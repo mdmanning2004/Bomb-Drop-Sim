@@ -18,7 +18,8 @@
 }
 
 body{
-    text-align: center; 
+    text-align: center;
+    margin: 0;
 }
 
 button{
@@ -29,9 +30,3 @@ button{
 p {
   margin: 0;
 }
-
-footer{
-    margin-top: 15px;
-}
-
-
