@@ -67,10 +67,12 @@ function distanceToLineSquared(point, lineStart, lineEnd) {
     if (param < 0) {
         x = lineStart[0];
         y = lineStart[1];
-    } else if (param > 1) {
+    } 
+    else if (param > 1) {
         x = lineEnd[0];
         y = lineEnd[1];
-    } else {
+    } 
+    else {
         x = lineStart[0] + param * C;
         y = lineStart[1] + param * D;
     }
@@ -85,25 +87,25 @@ function circlesWillOverlap(circle1, circle2) {
     return distanceBetweenCenters <= radiusSum;
 }
 
-function writeCrater(x, y, radius){
+function writeCrater(x, y, radius) {
     //inland
-    if(isPointInPolygon([x,y], uk)){
+    if (isPointInPolygon([x, y], uk)) {
         //close to the coast is flooded by default
-        if(distanceToClosestPointOnPolygon([x,y],uk) <= radius){
+        if (distanceToClosestPointOnPolygon([x, y], uk) <= radius) {
             craters.push({x: x, y: y, active: false, flooded: true, radius: radius});
         }
-        else{
+        else {
             //checks if its near a preflooded crater
             let nearFlood = false;
             //for every other crater
-            for(let i = 0; i < craters.length; i++){
+            for (let i = 0; i < craters.length; i++) {
                 //if they're in different spots
-                if(x != craters[i].x && y != craters[i].y){
+                if (x != craters[i].x && y != craters[i].y) {
                     let testCircle = {x:x, y:y, radius:radius};
                     //check if they'd overlap
-                    if (circlesWillOverlap(testCircle, craters[i])){
+                    if (circlesWillOverlap(testCircle, craters[i])) {
                         //if its overlapping a flooded crater
-                        if(craters[i].flooded){
+                        if (craters[i].flooded) {
                             //clearly flooded too  
                             nearFlood = true;
                             break;
@@ -116,15 +118,15 @@ function writeCrater(x, y, radius){
         }
     }
     //at sea
-    else{
+    else {
         craters.push({x: x, y: y, active: false, flooded: true, radius: radius});
     }
 }
 
-function checkNearbyFlooded(circle){
-    for(let i = 0; i < craters.length; i++){
-        if(circle.x != craters[i].x && circle.y != craters[i].y){
-            if(circlesWillOverlap(circle, craters[i]) && !craters[i].flooded){
+function checkNearbyFlooded(circle) {
+    for (let i = 0; i < craters.length; i++) {
+        if (circle.x != craters[i].x && circle.y != craters[i].y) {
+            if (circlesWillOverlap(circle, craters[i]) && !craters[i].flooded) {
                 craters[i].flooded = true;
                 checkNearbyFlooded(craters[i]);
             }
@@ -155,54 +157,54 @@ function isPointInPolygon(point, polygon) {
     return inside;
 }
 
-function nextFrame(){
+function nextFrame() {
     requestId = requestAnimationFrame(nextFrame);
     update();
     draw();
 }
 
-function update(){
+function update() {
     //increase the x pos of the plane
     plane.pos.x += splitAngledDistance(plane.angle, plane.speed).x;
     plane.pos.y += splitAngledDistance(plane.angle, plane.speed).y;
 
     //if the plane is past its target
-    if(hasPassedTarget(plane.spawn, plane.target, plane.pos)){
+    if (hasPassedTarget(plane.spawn, plane.target, plane.pos)) {
         //activate and shrink bomb
-        if(!bomb.active){
+        if (!bomb.active) {
             bomb.active = true;
             bombDropSound.play();
         }
         bomb.radius -=0.05;
 
         //if bomb small enough
-        if(bomb.radius <= 0.05){
+        if (bomb.radius <= 0.05) {
             //deactivate bomb and activate explosion
             bomb.active = false;
             bombDropSound.pause();
-            if(!bomb.explosion.active){
+            if (!bomb.explosion.active) {
                 boomSound.play();
                 bomb.explosion.active = true;
             }
 
             //timer is the disrance the plane has travelled since the target
-            timer = Math.sqrt(distanceSquared([plane.target.x,plane.target.y],[plane.pos.x,plane.pos.y])) * 0.01;
+            timer = Math.sqrt(distanceSquared([plane.target.x, plane.target.y], [plane.pos.x, plane.pos.y])) * 0.01;
 
             //if the explosion is large enough
-            if(bomb.explosion.radius >= craters[craters.length-1].radius*2){
+            if (bomb.explosion.radius >= craters[craters.length - 1].radius * 2) {
                 //activate the crater
                 craters[craters.length - 1].active = true;
                 //if the crater is flodded
-                if(craters[craters.length-1].flooded){
+                if (craters[craters.length - 1].flooded) {
                     //backfill
-                    if(!backfill){
+                    if (!backfill) {
                         backfill = true;
                         checkNearbyFlooded(craters[craters.length - 1]);
                     }
                 }
             }
             //if the explosion is too small
-            if (bomb.explosion.radius <0.15){
+            if (bomb.explosion.radius < 0.15) {
                 //deactive and cancel animation
                 bomb.explosion.active = false;
                 if(outOfBounds()){
@@ -211,59 +213,60 @@ function update(){
                     cancelAnimationFrame(requestId);
                 }
             }
-            else{
+            else {
                 //otherwise explosion follows equation
-                bomb.explosion.radius = incrementExplosion(craters[craters.length-1].radius);
+                bomb.explosion.radius = incrementExplosion(craters[craters.length - 1].radius);
             }
         }
     }
 }
 
-function outOfBounds(){
-    return plane.pos.x > WIDTH+65 || plane.pos.x < -65 || plane.pos.y > HEIGHT+50 || plane.pos.y < -50
+function outOfBounds() {
+    return plane.pos.x > WIDTH + 65 || plane.pos.x < -65 || plane.pos.y > HEIGHT + 50 || plane.pos.y < -50;
 }
 
 function hasPassedTarget(origin, givenPoint, targetPoint) {
     // Calculate distances from the origin
-    const distanceToGiven = Math.sqrt(distanceSquared([origin.x, origin.y], [givenPoint.x,givenPoint.y]));
-    const distanceToTarget = Math.sqrt(distanceSquared([origin.x,origin.y], [targetPoint.x,targetPoint.y]));
+    const distanceToGiven = Math.sqrt(distanceSquared([origin.x, origin.y], [givenPoint.x, givenPoint.y]));
+    const distanceToTarget = Math.sqrt(distanceSquared([origin.x, origin.y], [targetPoint.x, targetPoint.y]));
   
     // Check if the given point has passed the target point
     return !(distanceToGiven > distanceToTarget);
 }
 
-function incrementExplosion(val){
-   return val*3*(-1*Math.pow(0.5*(timer+0.01) - 1, 2) + 1);
+function incrementExplosion(val) {
+    //uses an equation to increase or decrease the size of the explosion based on time
+   return val * 3 * (-1 * Math.pow(0.5 * (timer + 0.01) - 1, 2) + 1);
 }
 
-function draw(){
+function draw() {
     //clear the screen
-    context.clearRect(0,0,WIDTH,HEIGHT);
+    context.clearRect(0, 0, WIDTH, HEIGHT);
 
     //draw the uk
     drawUK();
 
     //for every crater
-    for(let i = 0; i < craters.length; i++){
+    for(let i = 0; i < craters.length; i++) {
         //if it is active
-        if (craters[i].active){
+        if (craters[i].active) {
             //draw it either flooded or not flooded
-            if(craters[i].flooded){
+            if (craters[i].flooded) {
                 drawCircle("rgb(0, 200, 255)", craters[i].radius, craters[i].x, craters[i].y);
             }
-            else{
+            else {
                 drawCircle("brown", craters[i].radius, craters[i].x, craters[i].y);
             }
         }
     }
 
     //if there is an explosion active
-    if(bomb.explosion.active){
+    if (bomb.explosion.active) {
         drawCircle("orange", bomb.explosion.radius, plane.target.x, plane.target.y);
     }
 
     //if there is a bomb active
-    if(bomb.active){
+    if (bomb.active) {
         drawCircle("black", bomb.radius, plane.target.x, plane.target.y);
     }
     
@@ -276,14 +279,12 @@ function draw(){
     const angleInRadians = plane.angle * Math.PI / 180;
 
     context.translate(plane.pos.x, plane.pos.y);
-    console.log(angleInRadians);
     context.rotate(angleInRadians);
-    //drawCircle("black",5,0,0);
     context.drawImage(image, -imageWidth / 2, -imageHeight / 2, imageWidth, imageHeight);
     context.setTransform(1, 0, 0, 1, 0, 0);
 }
 
-function drawCircle(colour, radius, x, y){
+function drawCircle(colour, radius, x, y) {
     context.fillStyle = colour;
     context.beginPath();
     context.arc(x, y, radius, 0, Math.PI*2, true);
@@ -296,14 +297,11 @@ function drawPlane() {
     const angleInRadians = plane.angle * Math.PI / 180;
     context.rotate(angleInRadians);
 
-    
     const img = new Image();
     img.src = 'plane.png';
-
-    img.onload = function(){
+    img.onload = function() {
         context.drawImage(img, plane.pos.x, plane.pos.y, 65, 50);
     }
-    
 }
 
 function drawAngledElement() {
@@ -320,10 +318,9 @@ function drawAngledElement() {
     };
 }
 
-function drawPlane(){
+function drawPlane() {
     // Wait for the image to load before drawing
     image.onload = function() {
-
         const angleInRadians = (plane.angle * Math.PI) / 180;
 
         // Translate and rotate the canvas
@@ -337,19 +334,19 @@ function drawPlane(){
     };
 }
 
-function drawUK(){
+function drawUK() {
     context.fillStyle = "green";
     context.beginPath();
-    context.moveTo(0,0);
-    for(let i =0; i<uk.length; i++){
+    context.moveTo(0, 0);
+    for (let i =0; i<uk.length; i++) {
         context.lineTo(uk[i][0], uk[i][1]);
     }
     context.fill();
 }
 
-function click(evt){
+function click(evt) {
     //only one simulation allowed at once
-    if(!isAnimating){
+    if (!isAnimating) {
         isAnimating = true;
         flightSound.play();
         resetVariables();
@@ -380,7 +377,7 @@ function splitAngledDistance(angle, hypotenuse) {
     const xDistance = hypotenuse * Math.cos(radians);
     const yDistance = hypotenuse * Math.sin(radians);
   
-    return { x: xDistance, y: yDistance };
+    return {x: xDistance, y: yDistance};
 }
 
 function calculateAngle(pos1, pos2) {
@@ -423,10 +420,10 @@ function getRandomPointOnBorder() {
         y = Math.random() * HEIGHT;
         break;
     }
-    return { x, y };
+    return {x, y};
 }
 
-function resetSite(){
+function resetSite() {
     //Reset site is called on button press
     isAnimating = false;
     flightSound.pause();
@@ -441,7 +438,7 @@ function resetSite(){
     draw();
 }
 
-function resetVariables(){
+function resetVariables() {
     //Reset variables is called between simulations
     backfill = false;
     plane.pos.x = -65;
